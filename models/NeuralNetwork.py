@@ -1,5 +1,8 @@
 
 import numpy as np
+from IPython.core.pylabtools import retina_figure
+import math
+
 class NeuralNetwork():
 
 
@@ -10,7 +13,7 @@ class NeuralNetwork():
     8,4 are number of layers
     2 is output size
     """
-    def __init__(self, learning_rate:float, discount_factor:float, architecture = np.ndarray):
+    def __init__(self, learning_rate:float, discount_factor:float, architecture: np.ndarray, random_number1:float =-1.0, random_number2:float=1.0):
 
         """
          Input of
@@ -28,6 +31,8 @@ class NeuralNetwork():
         self.bias =  np.empty(self.number_of_layers+1, dtype=object)
         self.architecture = architecture
         self.weight = np.empty(self.number_of_layers+1, dtype=object)
+        self.random_number1 = random_number1
+        self.random_number2 = random_number2
         rng = np.random.default_rng()
         """
         MAKING THE NEURONS AND BIASES
@@ -72,8 +77,8 @@ class NeuralNetwork():
                ->[2,1] WHICH IS OUTPUT
                
                """
-               self.weight[i] = rng.random((architecture[i],architecture[i-1]))
-               self.bias[i] = rng.random((architecture[i],1))
+               self.weight[i] = rng.uniform(self.random_number1, self.random_number2,(architecture[i],architecture[i-1]))
+               self.bias[i] = rng.uniform(self.random_number1, self.random_number2, (architecture[i],1))
 
     def print_network(self, show_values=True, precision=3):
         print("\n" + "=" * 50)
@@ -113,6 +118,76 @@ class NeuralNetwork():
 
         print("=" * 50 + "\n")
 
+    def sigmoid(self, input):
+        return 1 / (1 + np.exp(-input))
 
+    def print_prediction_steps(self, input: np.array, precision=3):
+        if np.shape(input) != (self.architecture[0],):
+            print("INVALID INPUT SHAPE")
+            print(f" Expected: {(self.architecture[0],)}")
+            print(f" Got:      {np.shape(input)}")
+            return -1
 
+        input = input.reshape((self.architecture[0], 1))
 
+        print("\n" + "=" * 60)
+        print("FORWARD PASS")
+        print("=" * 60)
+        print(f"Architecture: {self.architecture}")
+        print(f"Starting input shape: {input.shape}")
+        print("Starting input:")
+        print(np.round(input, precision))
+
+        for i in range(1, len(self.architecture)):
+            layer_type = "OUTPUT" if i == len(self.architecture) - 1 else "HIDDEN"
+            W = self.weight[i]
+            b = self.bias[i]
+
+            print("\n" + "-" * 60)
+            print(f"Layer {i} ({layer_type})")
+            print(f"Calculating: weight[{i}] @ input + bias[{i}]")
+            print(f"weight[{i}] shape: {W.shape}")
+            print(f"input shape:     {input.shape}")
+            print(f"bias[{i}] shape:   {b.shape}")
+
+            z = W @ input + b
+
+            print(f"Result before activation shape: {z.shape}")
+            print("Result before activation:")
+            print(np.round(z, precision))
+
+            if i != len(self.architecture) - 1:
+                input = np.maximum(0, z)
+                print("Activation: ReLU, max(0, value)")
+            else:
+                input = self.sigmoid(z)
+                print("Activation: Sigmoid, 1 / (1 + exp(-value))")
+
+            print("Result after activation:")
+            print(np.round(input, precision))
+
+        print("\n" + "=" * 60)
+        print("FINAL OUTPUT")
+        print("=" * 60)
+        print(np.round(input, precision))
+        print("=" * 60 + "\n")
+
+        return input
+
+    def make_prediction(self, input:np.array):
+        if np.shape(input) != (self.architecture[0],):
+            return -1;
+        input = input.reshape((self.architecture[0], 1))
+        for i in range(len(self.architecture)):
+            if i == 0:
+                pass
+            else:
+                # @ does matrix multiplication
+                input = self.weight[i]@input + self.bias[i]
+                if(i!=len(self.architecture)-1):
+                    #RELU
+                    input = np.where(input <0, 0, input)
+                elif(i==len(self.architecture)-1):
+                    #SIGMOID
+                    return self.sigmoid(input)
+        return -1;
