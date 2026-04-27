@@ -2,8 +2,17 @@
 import numpy as np
 from IPython.core.pylabtools import retina_figure
 import math
-
+from state_action_pair import StateActionPair
+from agent_action import AgentAction
 class NeuralNetwork():
+    #preparing to store state action pairs
+    self.state_action_pairs:list[StateActionPair] =[]
+
+
+    self.isTraining = True;
+    def toggleTraining(self):
+        self.isTraining = not self.isTraining;
+
 
 
     """
@@ -66,7 +75,7 @@ class NeuralNetwork():
                -> [8,1]
                goes into second layer fo neurons that are
                [5 neurons with 8] * [8,1] 
-               ^^^^^^^^ is stored in weight[2][#neuron number] and its bias is bias[1][#neuron number]
+               ^^^^^^^^ is stored in weight[2][#neuron number] and its bias is bias[2][#neuron number]
                -> [5,1]
                
                then last later
@@ -190,4 +199,35 @@ class NeuralNetwork():
                 elif(i==len(self.architecture)-1):
                     #SIGMOID
                     return self.sigmoid(input)
+        return -1;
+
+    #will use the make_prediction method, but then store state, action, and probability of that action for back prop
+    #if this is the last observation from an episode it will run the backprop with the current stored-state action pair
+
+    #assuming that make_prediction was run before
+    """
+    make_prediction and then returns the chance of going left
+    after in the sim a random action is chosen
+    then we use this function to log the state, the action taken, probability of that action
+    
+    0 -> LEFT
+    1-> RIGHT
+    
+    if it is the final action it runs back propagation and does the training
+    
+    """
+    def record_action(self, input:np.ndarray, actionTaken: AgentAction, final_observation: bool = False, reward:float = None):
+        probability_of_left = make_prediction(input, final_observation)
+
+        # LEARN MORE ABOUT d_log_pt
+        if(actionTaken == AgentAction.LEFT):
+            state_action_pairs.append(StateActionPair(input, actionTaken, AgentAction.LEFT - probability_of_left))
+        if(actionTaken == AgentAction.RIGHT):
+            state_action_pairs.append(StateActionPair(input, actionTaken, AgentAction.Right - probability_of_left))
+
+        if(final_observation):
+            self.backpropagation(reward)
+
+
+    def backpropagation(self, reward:float):
         return -1;
