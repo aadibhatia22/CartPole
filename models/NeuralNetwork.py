@@ -5,11 +5,7 @@ import math
 from state_action_pair import StateActionPair
 from agent_action import AgentAction
 class NeuralNetwork():
-    #preparing to store state action pairs
-    self.state_action_pairs:list[StateActionPair] =[]
 
-
-    self.isTraining = True;
     def toggleTraining(self):
         self.isTraining = not self.isTraining;
 
@@ -23,6 +19,11 @@ class NeuralNetwork():
     2 is output size
     """
     def __init__(self, learning_rate:float, discount_factor:float, architecture: np.ndarray, random_number1:float =-1.0, random_number2:float=1.0):
+        # preparing to store state action pairs
+        self.state_action_pairs: list[StateActionPair] = []
+
+        self.isTraining = True;
+
 
         """
          Input of
@@ -216,18 +217,34 @@ class NeuralNetwork():
     if it is the final action it runs back propagation and does the training
     
     """
+
+
+
+    """storing state action pairs, takes in the agent's actions, and the input that produced that input"""
     def record_action(self, input:np.ndarray, actionTaken: AgentAction, final_observation: bool = False, reward:float = None):
-        probability_of_left = make_prediction(input, final_observation)
+        probability_of_left = self.make_prediction(input, final_observation)
 
         # LEARN MORE ABOUT d_log_pt
         if(actionTaken == AgentAction.LEFT):
-            state_action_pairs.append(StateActionPair(input, actionTaken, AgentAction.LEFT - probability_of_left))
+            self.state_action_pairs.append(StateActionPair(input, actionTaken, AgentAction.LEFT - probability_of_left))
         if(actionTaken == AgentAction.RIGHT):
-            state_action_pairs.append(StateActionPair(input, actionTaken, AgentAction.Right - probability_of_left))
+            self.state_action_pairs.append(StateActionPair(input, actionTaken, AgentAction.Right - probability_of_left))
 
         if(final_observation):
             self.backpropagation(reward)
 
 
     def backpropagation(self, reward:float):
+        return -1;
+
+
+
+
+    #### HELPER METHODS
+
+    def relu_derivative(self, input:np.array):
+        #1 if x is positive 0 otherwise
+        return 1*(input>0)
+
+    def first_layer_delta():
         return -1;
