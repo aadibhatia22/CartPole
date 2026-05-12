@@ -235,6 +235,7 @@ class NeuralNetwork():
 
 
     def backpropagation(self, reward:float):
+        #loss -> gradient L to W1 and L and Bias then do W - learning_rate*bias
         return -1;
 
 
